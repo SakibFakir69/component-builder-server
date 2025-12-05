@@ -43,10 +43,30 @@ const loginUser =async (req:Request, res:Response)=>{
 }
 
 
+// me 
+
+
+const me = async (req:Request , res:Response)=>{
+
+    const  userId = req.user?.id;
+
+
+    const result = await User.findById(userId);
+
+}
+
+// logout 
+const logout = async (req:RequestCache, res:Response)=>{
+
+
+//    clear cookies 
+
+}
+
 
 export const authController = {
 
 
-    loginUser
+    loginUser,me
 
 }

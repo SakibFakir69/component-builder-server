@@ -11,11 +11,12 @@ export const jwtToken = (req: Request, res: Response, next: NextFunction) => {
 
   // verify jwt
 
-  jwt.verify(accessToken, "secrect-key", (err, user) => {
+  jwt.verify(accessToken, "secrect-key", (err, decode) => {
     if (err) {
       return res.status(403).json({ message: "Invalid or expired token" });
     }
-    req.user = user;
+    req.user = decode as {id:string, email:string};
+    
     next();
   });
 };

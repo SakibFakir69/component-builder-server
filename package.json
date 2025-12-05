@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+     "test": "jest --passWithNoTests",
     "dev": "ts-node src/server.ts"
   },
   "keywords": [],
@@ -14,7 +14,12 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },

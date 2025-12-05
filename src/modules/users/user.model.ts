@@ -8,8 +8,7 @@ const userModel = new Schema<IUser>({
     name:String,
     email:String,
     password:String,
-     isSubscriptionActive:Boolean,
-     expire:String
+  
 
 })
 

@@ -7,38 +7,39 @@ import { User } from "./user.model";
 import { IUser } from "./user.interface";
 
 // create user
-const createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-// zod validation 
-    const userData=userValidation.safeParse(req.body);
-    if(!userData?.success)
-    {
-        return ReturnResponse(res, 404 , ' please fill the form');
+    // zod validation
+    const userData = userValidation.safeParse(req.body);
+    if (!userData?.success) {
+      return ReturnResponse(res, 404, " please fill the form");
     }
 
-    let {name, password ,email} = userData?.data;    
+    let { name, password, email } = userData?.data;
 
-    const isUserExits =await User.findOne({email:email});
-    if(isUserExits){
-        return ReturnResponse(res, 400, 'User is Exits')
+    const isUserExits = await User.findOne({ email: email });
+    if (isUserExits) {
+      return ReturnResponse(res, 400, "User is Exits");
     }
     console.log(isUserExits);
 
     if (!password || !name || !email) {
       return ReturnResponse(res, 400, "please fill up form");
     }
-    const saltRound = parseInt( process.env.SLAT_ROUND  || "10",10 ) as  number;
+    const saltRound = parseInt(process.env.SLAT_ROUND || "10", 10) as number;
 
-    password =await bcrypt.hash(password, saltRound || 10);
-    
-    const payload:Partial<IUser>={
-        name:name,
-        email:email,
-        password:password
-    }
+    password = await bcrypt.hash(password, saltRound || 10);
+
+    const payload: Partial<IUser> = {
+      name: name,
+      email: email,
+      password: password,
+    };
     console.log(payload);
-
-
 
     const result = await userServices.createUser(payload);
 
@@ -47,25 +48,25 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     next(error); // handle global error
   }
 };
-/// update user
-
-const updateUser = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-  } catch (error) {
-    next(error);
-  }
-};
 
 // delete
-const deleteUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {};
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+
+    const userId = req.user?.id;
+    const resutlt = await User.findByIdAndDelete(userId);
+
+    return ReturnResponse(res, 200,'user deleted successfully')
+
+
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 // export
 export const userController = {
   createUser,
-  updateUser,
+
   deleteUser,
 };
