@@ -8,6 +8,9 @@ import { notFounded } from './helper/helper.notfouned';
 import session from 'express-session';
 import cookieParser from 'cookie-parser'
 import { userRouter } from './modules/users/user.route';
+import { authRoute } from './modules/auth/auth.route';
+import { promptRouter } from './modules/prompt/prompt.route';
+
 
 const app = express();
 
@@ -29,6 +32,11 @@ app.use(express.json())
 // routes 
 
 app.use('/api/v1/user', userRouter);
+// auth
+app.use('/api/v1/auth', authRoute);
+// prompt
+app.use('/api/v1/prompt', promptRouter);
+
 
 app.get('/', async (req:Request,  res:Response)=>{
 

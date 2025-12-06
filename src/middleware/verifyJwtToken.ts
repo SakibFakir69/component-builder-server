@@ -1,22 +1,18 @@
-import { NextFunction, Request, Response } from "express";
+import { AuthUser } from './../types/express.d';
+// src/middleware/verifyJwtToken.ts
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export const jwtToken = (req: Request, res: Response, next: NextFunction) => {
-  const accessToken = req.headers.cookie ||  req.headers.authorization;
+export const verifyJwtToken = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  console.log(token)
 
-  if(!accessToken)
-  {
-      return res.status(401).json({ message: "No access token provided" });
-  }
+  if (!token) return res.status(401).json({ message: "No token" });
 
-  // verify jwt
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, decoded: any) => {
+    if (err) return res.status(403).json({ message: "Invalid token" });
 
-  jwt.verify(accessToken, "secrect-key", (err, decode) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
-    }
-    req.user = decode as {id:string, email:string};
-    
+    req.user = decoded as AuthUser;
     next();
   });
 };

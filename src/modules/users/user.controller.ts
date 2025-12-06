@@ -6,67 +6,69 @@ import { userValidation } from "./user.validation";
 import { User } from "./user.model";
 import { IUser } from "./user.interface";
 
-// create user
+// Create a new user
 export const createUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // zod validation
+    // Validate input
     const userData = userValidation.safeParse(req.body);
-    if (!userData?.success) {
-      return ReturnResponse(res, 404, " please fill the form");
+    if (!userData.success) {
+      return ReturnResponse(res, 400, "Please fill the form correctly");
     }
 
-    let { name, password, email } = userData?.data;
+    const { name, email, password } = userData.data;
 
-    const isUserExits = await User.findOne({ email: email });
-    if (isUserExits) {
-      return ReturnResponse(res, 400, "User is Exits");
+    // Check if user exists
+    const isUserExists = await User.findOne({ email });
+    if (isUserExists) {
+      return ReturnResponse(res, 400, "User already exists");
     }
-    console.log(isUserExits);
 
-    if (!password || !name || !email) {
-      return ReturnResponse(res, 400, "please fill up form");
-    }
-    const saltRound = parseInt(process.env.SLAT_ROUND || "10", 10) as number;
+    // Hash password
+    const saltRounds = parseInt(process.env.SALT_ROUND || "10", 10);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    password = await bcrypt.hash(password, saltRound || 10);
-
+    // Create payload
     const payload: Partial<IUser> = {
-      name: name,
-      email: email,
-      password: password,
+      name,
+      email,
+      password: hashedPassword,
     };
-    console.log(payload);
 
+    // Save user
     const result = await userServices.createUser(payload);
 
-    return ReturnResponse(res, 201, "User Created SuccessFully", result);
+    return ReturnResponse(res, 201, "User created successfully", result);
   } catch (error) {
-    next(error); // handle global error
+    next(error);
   }
 };
 
-// delete
-const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+// Delete logged-in user
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    const  userId = (req as any).user?.id;
 
-    const userId = req.user?.id;
-    const resutlt = await User.findByIdAndDelete(userId);
+    if (!userId) return ReturnResponse(res, 401, "Unauthorized");
 
-    return ReturnResponse(res, 200,'user deleted successfully')
+    const result = await User.findByIdAndDelete(userId);
+    if (!result) return ReturnResponse(res, 404, "User not found");
 
-
+    return ReturnResponse(res, 200, "User deleted successfully");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
-// export
+// Export controller
 export const userController = {
   createUser,
-
   deleteUser,
 };

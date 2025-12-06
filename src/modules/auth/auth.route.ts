@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { authController } from "./auth.controller";
+import { verifyJwtToken } from "../../middleware/verifyJwtToken";
+
 
 
 const router = Router();
@@ -10,7 +12,9 @@ const router = Router();
 
 
 router.post('/login-user', authController.loginUser);
-router.get('/me', authController.me);
+router.get('/me',verifyJwtToken ,  authController.me);
+router.post('/logout', verifyJwtToken, authController.logout)
+
 
 
 export const authRoute = router;

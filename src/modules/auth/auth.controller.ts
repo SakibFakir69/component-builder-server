@@ -1,72 +1,86 @@
-import { Request, Response } from "express"
-import { User } from "../users/user.model"
+import { Request, Response } from "express";
+import { User } from "../users/user.model";
 import { ReturnResponse } from "../../helper/helper.returnresponse";
 import jwt from "jsonwebtoken";
 
+// login user
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
 
-
-const loginUser =async (req:Request, res:Response)=>{
-    const {email}=req.body;
-
-    const isUserExits = await User.findOne({email:email});
-
-
-    if(!isUserExits)
-    {
-        return ReturnResponse(res, 400, 'User not founded');
-    };
-
-    const payload = {
-        id:isUserExits.id,
-        email:isUserExits?.email
+    if (!email || !password) {
+      return ReturnResponse(res, 400, "Email and password are required");
     }
 
-    const accessToken = jwt.sign(payload,'secrect-key',{
-        expiresIn:"5d"
-    })
-    const refreshToken = jwt.sign(payload, 'refresh-key',{
-        expiresIn:"30d"
-
-    })
-
-    const user = {
-        data:isUserExits,
-        accessToken:accessToken,
-        refreshToken:refreshToken
+    const user = await User.findOne({ email });
+    if (!user) {
+      return ReturnResponse(res, 400, "User not found");
     }
 
-    return ReturnResponse(res, 200, 'User login successfully', user);
 
+    const payload = { id: user.id, email: user.email };
 
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET || "secret-key", {
+      expiresIn: "5d",
+    });
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || "refresh-key", {
+      expiresIn: "30d",
+    });
 
+    // set cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
-}
+    const userData = { id: user.id, name: user.name, email: user.email };
 
+    return ReturnResponse(res, 200, "User login successfully", { user: userData, accessToken, refreshToken });
+  } catch (error) {
+    console.error(error);
+    return ReturnResponse(res, 500, "Server error");
+  }
+};
 
-// me 
+// get logged-in user
+const me = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    
+    if (!userId) return ReturnResponse(res, 401, "Unauthorized");
 
+    const user = await User.findById(userId).select("-password"); // exclude password
+    if (!user) return ReturnResponse(res, 404, "User not found");
 
-const me = async (req:Request , res:Response)=>{
+    return ReturnResponse(res, 200, "User data fetched successfully", user);
+  } catch (error) {
+    console.error(error);
+    return ReturnResponse(res, 500, "Server error");
+  }
+};
 
-    const  userId = req.user?.id;
+// logout user
+const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
 
+    return ReturnResponse(res, 200, "User logged out successfully");
+  } catch (error) {
+    console.error(error);
+    return ReturnResponse(res, 500, "Server error");
+  }
+};
 
-    const result = await User.findById(userId);
-
-}
-
-// logout 
-const logout = async (req:RequestCache, res:Response)=>{
-
-
-//    clear cookies 
-
-}
-
-
+// export controller
 export const authController = {
-
-
-    loginUser,me
-
-}
+  loginUser,
+  me,
+  logout,
+};
