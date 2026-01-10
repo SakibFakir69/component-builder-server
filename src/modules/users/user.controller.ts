@@ -15,6 +15,7 @@ export const createUser = async (
   try {
     // Validate input
     const userData = userValidation.safeParse(req.body);
+    console.log(userData)
     if (!userData.success) {
       return ReturnResponse(res, 400, "Please fill the form correctly");
     }

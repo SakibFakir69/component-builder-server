@@ -11,6 +11,8 @@ const chatSchema = new Schema<IPrompt>({
       timestamp: { type: Date, default: Date.now }
     }
   ]
+},{
+  timestamps:true
 });
 
 export const Chat = mongoose.model("chat", chatSchema);

@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "./user.interface";
-import { string } from "zod";
 
 
 
@@ -10,6 +9,6 @@ const userModel = new Schema<IUser>({
     password:String,
   
 
-})
+},{timestamps:true , versionKey:false})
 
 export const User = mongoose.model("user", userModel);

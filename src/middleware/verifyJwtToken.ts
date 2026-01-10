@@ -2,6 +2,7 @@ import { AuthUser } from './../types/express.d';
 // src/middleware/verifyJwtToken.ts
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { decode } from 'punycode';
 
 export const verifyJwtToken = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
@@ -13,6 +14,7 @@ export const verifyJwtToken = (req: Request, res: Response, next: NextFunction) 
     if (err) return res.status(403).json({ message: "Invalid token" });
 
     req.user = decoded as AuthUser;
+    console.log(decode, req?.user)
     next();
   });
 };

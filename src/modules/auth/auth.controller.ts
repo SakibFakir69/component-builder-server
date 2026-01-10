@@ -17,31 +17,44 @@ const loginUser = async (req: Request, res: Response) => {
       return ReturnResponse(res, 400, "User not found");
     }
 
+    const payload = { id: user._id, email: user.email };
 
-    const payload = { id: user.id, email: user.email };
-
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET || "secret-key", {
-      expiresIn: "5d",
-    });
-    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || "refresh-key", {
-      expiresIn: "30d",
-    });
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || "secret-key",
+      {
+        expiresIn: "5d",
+      }
+    );
+    const refreshToken = jwt.sign(
+      payload,
+      process.env.JWT_REFRESH_SECRET || "refresh-key",
+      {
+        expiresIn: "30d",
+      }
+    );
 
     // set cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false, // false for local dev
+      sameSite: "lax", // allow sending cookie on cross-origin requests from frontend
+      maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
     const userData = { id: user.id, name: user.name, email: user.email };
 
-    return ReturnResponse(res, 200, "User login successfully", { user: userData, accessToken, refreshToken });
+    return ReturnResponse(res, 200, "User login successfully", {
+      user: userData,
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     console.error(error);
     return ReturnResponse(res, 500, "Server error");
@@ -52,7 +65,7 @@ const loginUser = async (req: Request, res: Response) => {
 const me = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    
+
     if (!userId) return ReturnResponse(res, 401, "Unauthorized");
 
     const user = await User.findById(userId).select("-password"); // exclude password

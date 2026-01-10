@@ -10,8 +10,13 @@ const createPrompt = async (req: Request, res: Response) => {
   try {
     const userId = (req as any)?.user?.id;
 
-    const { prompt, sessionId } = req.body;
-    console.log(prompt, sessionId , userId , ' id ')
+    let { prompt, sessionId } = req.body;
+
+    if(!prompt)
+    {
+      prompt='how are you';
+    }
+    console.log(prompt, sessionId, userId, " id ");
 
     if (!prompt || !sessionId) {
       return res
@@ -47,7 +52,7 @@ User instruction: ${prompt}
     );
 
     return res.status(200).json({
-      id:userId,
+      id: userId,
       status: true,
       ai: result.text,
       sessionId: sessionId,
@@ -66,8 +71,8 @@ User instruction: ${prompt}
 const chatHistory = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    console.log(userId , ' user id ')
-    const result = await Chat.find({ userId: userId });
+    console.log(userId, " user id ");
+      const result = await Chat.find({ userId:userId }).sort({ createdAt: -1 }).limit(6); 
 
     console.log(result);
 
