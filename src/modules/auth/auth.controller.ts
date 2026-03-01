@@ -48,13 +48,16 @@ const loginUser = async (req: Request, res: Response) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    const userData = { id: user.id, name: user.name, email: user.email };
+    const userData = { id: user.id, name: user.name, email: user.email , role:user?.role };
 
     return ReturnResponse(res, 200, "User login successfully", {
-      user: userData,
+       userData,
       accessToken,
       refreshToken,
     });
+
+    
+    
   } catch (error) {
     console.error(error);
     return ReturnResponse(res, 500, "Server error");

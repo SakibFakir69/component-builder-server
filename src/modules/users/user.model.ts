@@ -5,8 +5,16 @@ import { IUser } from "./user.interface";
 
 const userModel = new Schema<IUser>({
     name:String,
-    email:String,
+    email:{
+        type:String,
+        unique:true
+    },
     password:String,
+    role:{
+        type:String,
+        enum:['User', 'Admin'],
+        default:"User"
+    }
   
 
 },{timestamps:true , versionKey:false})

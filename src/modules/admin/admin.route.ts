@@ -6,7 +6,9 @@ const router = Router();
 router.get("/payments", adminController.allPayment);
 
 // Get all users
+// search my email and make indexing for search by email and crud 
 router.get("/users", adminController.allUser);
+router.get("/user/email", adminController.searchUserByEmail);
 
 // Delete a user by ID
 router.delete("/users/:id", adminController.deleteUser);

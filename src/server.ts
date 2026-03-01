@@ -1,12 +1,21 @@
 import mongoose from "mongoose";
 import { Server } from "http";
 import { server } from "."; // Must be exported from root file
-import { exit } from "process";
+import { User } from "./modules/users/user.model";
+
 
 const port = process.env.PORT;
 const URI = process.env.MONGODB_URL;
 
 let httpServer: Server;
+
+//  INDEXING BY USE EMAIL
+// (async()=>{
+
+//     const result = await User.collection.createIndex({email:1});
+//     console.log(result , 'indexing create on email')
+
+// })();
 
 (async () => {
     if (!URI) {

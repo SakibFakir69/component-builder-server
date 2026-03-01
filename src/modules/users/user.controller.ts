@@ -20,7 +20,7 @@ export const createUser = async (
       return ReturnResponse(res, 400, "Please fill the form correctly");
     }
 
-    const { name, email, password } = userData.data;
+    const { name, email, password ,role} = userData.data;
 
     // Check if user exists
     const isUserExists = await User.findOne({ email });
@@ -37,6 +37,8 @@ export const createUser = async (
       name,
       email,
       password: hashedPassword,
+      role
+
     };
 
     // Save user

@@ -14,8 +14,8 @@ const createPrompt = async (req: Request, res: Response) => {
 
     if(!prompt)
     {
-      prompt='how are you';
-    }
+      prompt=''
+      }
     console.log(prompt, sessionId, userId, " id ");
 
     if (!prompt || !sessionId) {
@@ -62,7 +62,7 @@ User instruction: ${prompt}
     console.error(error);
     return res
       .status(500)
-      .json({ status: false, message: "Internal server error" });
+      .json({ status: false, message: "Internal server error" ,error:error });
   }
 };
 

@@ -6,6 +6,12 @@ import mongoose from "mongoose";
 
 // all payment, all user 
 
+// user , search ,delete ,and user details 
+// payment all opration 
+// dashboard 
+// some front-end bug 
+
+
 const allPayment = async(req:Request , res:Response)=>{
 
     try {
@@ -35,6 +41,28 @@ const allUser =async (req:Request, res:Response)=>{
 
 }
 
+const searchUserByEmail = async (req:Request,res:Response)=>{
+
+    try {
+        const searchItems = req.body.query || "";
+        
+
+        const result = await User.findOne({email:searchItems , $options:"i"});
+
+        if(!result)
+        {
+            return ReturnResponse(res, 404, "User not found")
+        }
+        return res.status(200).json(
+            result
+        )
+    
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
 const deleteUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -59,6 +87,9 @@ const deleteUser = async (req: Request, res: Response) => {
         return ReturnResponse(res, 500, "Failed to delete user");
     }
 }
+
+
+
 export const adminController = {
-    allPayment, allUser,deleteUser
+    allPayment, allUser,deleteUser,searchUserByEmail
 }
