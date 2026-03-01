@@ -9,6 +9,7 @@ router.get("/payments", adminController.allPayment);
 // search my email and make indexing for search by email and crud 
 router.get("/users", adminController.allUser);
 router.get("/user/email", adminController.searchUserByEmail);
+router.get('/user/payment/:id', adminController.userPaymentAndUserDetails);
 
 // Delete a user by ID
 router.delete("/users/:id", adminController.deleteUser);
