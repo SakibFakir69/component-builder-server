@@ -4,13 +4,18 @@ import { ReturnResponse } from "../../helper/helper.returnresponse";
 import { User } from "../users/user.model";
 import mongoose from "mongoose";
 
-// all payment, all user
 
-// user ,and user details
-// payment all opration
+// make admin protect route 
+
+// user - handle multiple user use pagination
+// make admin only access admin api 
+
+
 // dashboard
 // some front-end bug
 
+
+// add payment pagination , search , filter
 const allPayment = async (req: Request, res: Response) => {
   try {
     const allPayment = await Payment.find({});
@@ -21,30 +26,52 @@ const allPayment = async (req: Request, res: Response) => {
     console.log(error);
   }
 };
+
+
+
 const allUser = async (req: Request, res: Response) => {
   try {
-    const allUser = await User.find({});
+    const pageLimit = parseInt(req.query.pageLimit as string) || 10;
+    const lastId = (req.query.lastId as string) || undefined;
+    const role = req.query.role as string | undefined;
+    const search = (req.query.search as string) || undefined;
 
-    return ReturnResponse(res, 200, " all user retrive sucessfull", allUser);
-  } catch (error) {
-    console.log(error);
-  }
-};
+    const query: any = {};
 
-const searchUserByEmail = async (req: Request, res: Response) => {
-  try {
-    const searchItems = req.body.query || "";
-
-    const result = await User.findOne({ email: searchItems, $options: "i" });
-
-    if (!result) {
-      return ReturnResponse(res, 404, "User not found");
+    if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
     }
-    return res.status(200).json(result);
-  } catch (error) {
+    if (role) {
+      query.role = role;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const allUser = await User.find(query)
+      .sort({ createAt: "asc" })
+      .limit(pageLimit);
+    /// next cursor
+    const nextCursor = allUser.length ? allUser[allUser.length - 1]._id : null;
+
+    return ReturnResponse(res, 200, "Users fetched successfully", {
+      allUser,
+      nextCursor,
+      pageLimit,
+    });
+  } catch (error: any) {
     console.log(error);
+    return ReturnResponse(res, 500, "Internal server error", {
+      name: error?.name,
+      message: error?.message,
+      stack: process.env.NODE_ENV === "development" ? error?.stack : undefined,
+    });
   }
 };
+
+
 
 ////    USER PAYMENT AND PLAN
 
@@ -58,12 +85,11 @@ const userPaymentAndUserDetails = async (req: Request, res: Response) => {
       return ReturnResponse(res, 404, "User payment Details  not founded");
     }
     return res.status(200).json(resultForPayment);
-
   } catch (error: any) {
     console.log(error);
     return ReturnResponse(res, 500, "Internal server error", {
       error: error?.name,
-      stack: error.stack,
+      message: error.message,
     });
   }
 };
@@ -101,6 +127,6 @@ export const adminController = {
   allPayment,
   allUser,
   deleteUser,
-  searchUserByEmail,
-  userPaymentAndUserDetails
+
+  userPaymentAndUserDetails,
 };
