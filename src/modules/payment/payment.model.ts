@@ -4,6 +4,7 @@ import mongoose, { Schema, model, Document } from "mongoose";
 
 export interface IPayment extends Document {
   userId: mongoose.Types.ObjectId;  
+  name:string,
   planName: string;
   price: number;                     
   expiresAt: Date;
@@ -21,6 +22,8 @@ const paymentSchema = new Schema<IPayment>(
       ref: "User",
       required: true,
     },
+    name:{type:String},
+
     planName: {
       type: String,
       required: true,

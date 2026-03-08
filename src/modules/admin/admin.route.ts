@@ -13,7 +13,9 @@ router.get("/users",roleChecker, adminController.allUser);
 router.get("/users/payments/:userId", adminController.userPaymentAndUserDetails);
 // Delete a user by ID
 router.delete("/users/:id",roleChecker, adminController.deleteUser);
-// user name finder
-router.get('/name-finder/:userId', adminController.userNameFinder)
+
+router.get('/dashboard', adminController.dashboardInfo);
+
+
 
 export const adminRoutes = router;

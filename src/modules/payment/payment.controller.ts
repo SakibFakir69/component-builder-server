@@ -3,6 +3,7 @@ import { Payment } from "./payment.model";
 import { ReturnResponse } from "../../helper/helper.returnresponse";
 import mongoose from "mongoose";
 import { stripe } from "../../utils/stripe";
+import { User } from "../users/user.model";
 
 const createPayment = async (req: Request, res: Response) => {
   try {
@@ -77,8 +78,19 @@ const confirmPayment = async (req: Request, res: Response) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + durationDays);
 
+    const paymentUserName = await User.findById(userId);
+    if(!paymentUserName)
+    {
+      return res.status(404).json({
+        success:false
+        ,
+        message:"User Name Not Founded"
+      })
+    }
+
     const payment = await Payment.create({
       userId,
+      name:paymentUserName?.name,
       planName,
       price: session.amount_total! / 100,
       expiresAt,

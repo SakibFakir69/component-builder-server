@@ -3,6 +3,7 @@ import { Payment } from "../payment/payment.model";
 import { ReturnResponse } from "../../helper/helper.returnresponse";
 import { User } from "../users/user.model";
 import mongoose from "mongoose";
+import { match } from "assert";
 
 // make admin protect route
 
@@ -16,6 +17,7 @@ import mongoose from "mongoose";
 const allPayment = async (req: Request, res: Response) => {
   try {
     const allPayment = await Payment.find({});
+
     console.log(allPayment, "payment");
 
     return ReturnResponse(res, 200, "Payment retrive successfull", allPayment);
@@ -167,6 +169,51 @@ const userNameFinder = async (req:Request, res:Response)=>{
     
   }
 }
+// DASHBOARD INFO API 
+
+const dashboardInfo = async (req: Request, res: Response) => {
+  try {
+
+    const userCount = await User.aggregate([
+      { $group: { _id: null, count: { $sum: 1 } } }
+    ]);
+
+    const paymentCount = await Payment.aggregate([
+      { $group: { _id: null, count: { $sum: 1 } } }
+    ]);
+
+    const activePlan = await Payment.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: null, count: { $sum: 1 } } }
+    ]);
+
+    const totalPlanPayment = await Payment.aggregate([
+      { $group: { _id: null, totalRevenue: { $sum: "$price" } } }
+    ]);
+
+    const dashboardInfo = {
+      totalUser: userCount[0]?.count || 0,
+      totalPaymentCount: paymentCount[0]?.count || 0,
+      totalPayment: totalPlanPayment[0]?.totalRevenue || 0,
+      activePlan: activePlan[0]?.count || 0
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin Dashboard Data Retrieve Successfully",
+      data: dashboardInfo
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load dashboard info"
+    });
+  }
+};
+
 
 export const adminController = {
   allPayment,
@@ -174,5 +221,6 @@ export const adminController = {
   deleteUser,
 
   userPaymentAndUserDetails,
-  userNameFinder
+  userNameFinder,
+  dashboardInfo
 };
