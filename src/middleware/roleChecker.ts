@@ -9,10 +9,14 @@ export const roleChecker = async (
   next: NextFunction
 ) => {
   try {
+
+    console.log("call roll checker")
    
     const token =
       req.cookies?.accessToken ||
       req.headers.authorization?.split(" ")[1];
+  console.log(token , ' token');
+
 
     if (!token) {
       return res.status(401).json({
