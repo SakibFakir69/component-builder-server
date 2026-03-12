@@ -72,7 +72,6 @@ const allUser = async (req: Request, res: Response) => {
 
 ////    USER PAYMENT AND PLAN
 
-
 const userPaymentAndUserDetails = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId;
@@ -136,84 +135,108 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+// FIND USER NAME BY ID
 
-// FIND USER NAME BY ID 
-
-const userNameFinder = async (req:Request, res:Response)=>{
-
+const userNameFinder = async (req: Request, res: Response) => {
   try {
-    const userId = req.body.query ;
+    const userId = req.body.query;
 
-    if(!userId)
-    {
+    if (!userId) {
       return res.status(404).json({
-        success:false,
-        message:"User not founded"
-      })
+        success: false,
+        message: "User not founded",
+      });
     }
     const userInfo = await User.findById(userId).select("name email");
 
     return res.status(200).json({
-      success:true,
-      message:"User Info Retrieve Successfully",
-      data:userInfo
-    })
-
-
-    
-  } catch (error:any) {
+      success: true,
+      message: "User Info Retrieve Successfully",
+      data: userInfo,
+    });
+  } catch (error: any) {
     return res.status(500).json({
-      error:error.name,
-      message:error.name
-    })
-    
+      error: error.name,
+      message: error.name,
+    });
   }
-}
-// DASHBOARD INFO API 
+};
+// DASHBOARD INFO API
 
 const dashboardInfo = async (req: Request, res: Response) => {
   try {
-
     const userCount = await User.aggregate([
-      { $group: { _id: null, count: { $sum: 1 } } }
+      { $group: { _id: null, count: { $sum: 1 } } },
     ]);
 
     const paymentCount = await Payment.aggregate([
-      { $group: { _id: null, count: { $sum: 1 } } }
+      { $group: { _id: null, count: { $sum: 1 } } },
     ]);
 
     const activePlan = await Payment.aggregate([
       { $match: { isActive: true } },
-      { $group: { _id: null, count: { $sum: 1 } } }
+      { $group: { _id: null, count: { $sum: 1 } } },
     ]);
 
     const totalPlanPayment = await Payment.aggregate([
-      { $group: { _id: null, totalRevenue: { $sum: "$price" } } }
+      { $group: { _id: null, totalRevenue: { $sum: "$price" } } },
     ]);
 
     const dashboardInfo = {
       totalUser: userCount[0]?.count || 0,
       totalPaymentCount: paymentCount[0]?.count || 0,
       totalPayment: totalPlanPayment[0]?.totalRevenue || 0,
-      activePlan: activePlan[0]?.count || 0
+      activePlan: activePlan[0]?.count || 0,
     };
 
     return res.status(200).json({
       success: true,
       message: "Admin Dashboard Data Retrieve Successfully",
-      data: dashboardInfo
+      data: dashboardInfo,
     });
-
   } catch (error) {
     console.log(error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to load dashboard info"
+      message: "Failed to load dashboard info",
     });
   }
 };
 
+// USER GRAPH
+
+const userGraph = async (req: Request, res: Response) => {
+  try {
+    const result = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalUsers: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+    
+  } catch (error: any) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      error: error.name,
+    });
+  }
+};
 
 export const adminController = {
   allPayment,
@@ -222,5 +245,6 @@ export const adminController = {
 
   userPaymentAndUserDetails,
   userNameFinder,
-  dashboardInfo
+  dashboardInfo,
+  userGraph,
 };
