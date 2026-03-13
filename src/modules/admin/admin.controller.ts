@@ -227,7 +227,44 @@ const userGraph = async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-    
+  } catch (error: any) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      error: error.name,
+    });
+  }
+};
+
+// PAYMENT GRAPH
+
+const paymentGraph = async (req: Request, res: Response) => {
+  try {
+
+    const r = await Payment.find().limit(3);
+    console.log(r);
+    const result = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            year:{$year:"$createdAt"},
+            month: { $month: "$createdAt" },
+          },
+          totalBuy: { $sum: 1 },
+          totalPrice: { $sum: "$price" },
+        },
+      },
+      {
+        $sort:{"_id.year":1, "_id:month":1}
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+  
+    });
   } catch (error: any) {
     console.log(error);
     return res.status(500).json({
@@ -247,4 +284,5 @@ export const adminController = {
   userNameFinder,
   dashboardInfo,
   userGraph,
+  paymentGraph,
 };

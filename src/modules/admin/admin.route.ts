@@ -15,6 +15,6 @@ router.delete("/users/:id",roleChecker, adminController.deleteUser);
 router.get('/dashboard', adminController.dashboardInfo);
 
 router.get('/users-graph',adminController.userGraph)
-
+router.get('/payments-graph', adminController.paymentGraph)
 
 export const adminRoutes = router;
