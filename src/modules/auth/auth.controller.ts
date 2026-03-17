@@ -48,10 +48,10 @@ const loginUser = async (req: Request, res: Response) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    const userData = { id: user.id, name: user.name, email: user.email , role:user?.role };
+   
 
     return ReturnResponse(res, 200, "User login successfully", {
-       userData,
+      
       accessToken,
       refreshToken,
     });
@@ -83,6 +83,7 @@ const me = async (req: Request, res: Response) => {
 
 // logout user
 const logout = async (req: Request, res: Response) => {
+  
   try {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");

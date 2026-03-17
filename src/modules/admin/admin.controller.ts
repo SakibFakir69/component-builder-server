@@ -74,7 +74,9 @@ const allUser = async (req: Request, res: Response) => {
 
 const userPaymentAndUserDetails = async (req: Request, res: Response) => {
   try {
+    console.log("user payment details")
     const userId = req.params.userId;
+    console.log(userId)
 
     if (!userId) {
       return res.status(400).json({
@@ -88,6 +90,7 @@ const userPaymentAndUserDetails = async (req: Request, res: Response) => {
       });
     }
 
+
     const resultForPayment = await Payment.findById(userId);
 
     if (!resultForPayment) {
@@ -97,6 +100,7 @@ const userPaymentAndUserDetails = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(resultForPayment);
+
   } catch (error: any) {
     console.log(error);
     return res.status(500).json({

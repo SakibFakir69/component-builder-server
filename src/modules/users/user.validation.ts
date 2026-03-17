@@ -15,7 +15,6 @@ export const userValidation = z.object({
     .string()
     .min(6, { message: "Password must be at least 6 characters" })
     .max(128, { message: "Password must be less than 128 characters" }),
-
-    role:z.string(),
+    role:z.string().default("User")
   
 })
