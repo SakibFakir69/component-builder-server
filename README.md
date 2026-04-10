@@ -42,7 +42,7 @@ A powerful, production-ready backend server for an **AI-powered UI component gen
 | AI | Google Gemini API |
 | Payments | Stripe |
 | Validation | Zod |
-| Testing | Jest + Supertest |
+
 
 ---
 
