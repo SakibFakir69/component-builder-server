@@ -37,15 +37,15 @@ const loginUser = async (req: Request, res: Response) => {
     // set cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // false for local dev
-      sameSite: "lax", // allow sending cookie on cross-origin requests from frontend
-      maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+      secure: true, 
+      sameSite: "none", 
+      maxAge: 5 * 24 * 60 * 60 * 1000, 
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, 
     });
 
    
@@ -95,6 +95,62 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
+
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+  
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token not found",
+      });
+    }
+
+   
+    const decoded = jwt.verify(
+      token,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as any;
+
+    if (!decoded) {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid refresh token",
+      });
+    }
+
+    const userId = decoded.userId;
+
+    const newAccessToken = jwt.sign(
+      { userId },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: "5d" }
+    );
+
+  
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: true, 
+      sameSite: "none",
+      maxAge: 5 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Access token refreshed",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Refresh token failed",
+    });
+  }
+};
 // export controller
 export const authController = {
   loginUser,
